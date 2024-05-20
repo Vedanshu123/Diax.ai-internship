@@ -46,6 +46,6 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.listen(PORT, "192.168.111.215", () => {
-  console.log(`Server is running on http://192.168.111.215:${PORT}`);
+app.listen(PORT, "public ip address", () => {
+  console.log(`Server is running on http://"public ip address":${PORT}`);
 });
