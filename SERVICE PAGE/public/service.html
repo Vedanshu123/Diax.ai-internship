@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Service Feedback</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(to right, #6a11cb, #2575fc);
+        overflow: hidden;
+      }
+      .container {
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        max-width: 500px;
+        width: 100%;
+        animation: fadeIn 1.5s ease-in-out;
+      }
+      h1 {
+        font-size: 28px;
+        margin-bottom: 20px;
+        text-align: center;
+        color: black;
+      }
+      .question {
+        margin-bottom: 20px;
+      }
+      .question label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 16px;
+        color: #555;
+      }
+      .question input {
+        margin-right: 10px;
+      }
+      .submit-btn {
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 5px;
+        background-color: #4caf50;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .submit-btn:hover {
+        background-color: #45a049;
+      }
+      #thanks-message {
+        display: none;
+        text-align: center;
+        animation: fadeIn 1.5s ease-in-out;
+      }
+      #thanks-message h2 {
+        color: black;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Service Feedback</h1>
+      <form id="feedback-form">
+        <div class="question">
+          <label for="question1"
+            >1. Are you issuing digital prescriptions?</label
+          >
+          <input type="radio" name="question1" value="yes" required /> Yes
+          <input type="radio" name="question1" value="no" required /> No
+        </div>
+        <div class="question">
+          <label for="question2"
+            >2. Will you be interested in paid software that suggests drugs for
+            patients?</label
+          >
+          <input type="radio" name="question2" value="yes" required /> Yes
+          <input type="radio" name="question2" value="no" required /> No
+        </div>
+        <div class="question">
+          <label for="question3"
+            >3. Will you be interested in paid software with well-defined
+            process to treat diabetic foot effectively?</label
+          >
+          <input type="radio" name="question3" value="yes" required /> Yes
+          <input type="radio" name="question3" value="no" required /> No
+        </div>
+        <button type="submit" class="submit-btn">Submit</button>
+      </form>
+      <div id="thanks-message">
+        <h2>Thanks for Submitting</h2>
+      </div>
+    </div>
+    <script>
+      document
+        .getElementById("feedback-form")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+          const formData = new FormData(event.target);
+          const data = Object.fromEntries(formData.entries());
+          const response = await fetch("/submit-feedback", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          if (response.ok) {
+            document.getElementById("feedback-form").style.display = "none";
+            document.getElementById("thanks-message").style.display = "block";
+          }
+        });
+    </script>
+  </body>
+</html>

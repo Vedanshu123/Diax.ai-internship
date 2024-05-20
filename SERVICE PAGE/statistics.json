@@ -1,0 +1,14 @@
+{
+  "question1": {
+    "yes": 9,
+    "no": 0
+  },
+  "question2": {
+    "yes": 0,
+    "no": 9
+  },
+  "question3": {
+    "yes": 7,
+    "no": 2
+  }
+}
