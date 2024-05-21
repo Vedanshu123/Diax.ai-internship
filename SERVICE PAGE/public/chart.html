@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Response Statistics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      .chart-container {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 20px;
+        height: 500px; /* Fixed height to prevent scrolling */
+        overflow-y: auto; /* Enable vertical scroll if needed */
+      }
+      .chart-section {
+        text-align: center;
+      }
+      canvas {
+        max-width: 400px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Response Statistics</h2>
+    <div class="chart-container">
+      <div class="chart-section">
+        <canvas id="q1Chart" width="400" height="400"></canvas>
+        <h3>Q1</h3>
+      </div>
+      <div class="chart-section">
+        <canvas id="q2Chart" width="400" height="400"></canvas>
+        <h3>Q2</h3>
+      </div>
+      <div class="chart-section">
+        <canvas id="q3Chart" width="400" height="400"></canvas>
+        <h3>Q3</h3>
+      </div>
+    </div>
+    <h3>Total Submissions: <span id="totalSubmissions"></span></h3>
+
+    <script>
+      fetch("/responses")
+        .then((response) => response.json())
+        .then((data) => {
+          createPieChart("q1Chart", "Q1", data.q1);
+          createPieChart("q2Chart", "Q2", data.q2);
+          createPieChart("q3Chart", "Q3", data.q3);
+          document.getElementById("totalSubmissions").innerText =
+            data.totalSubmissions;
+        });
+
+      function createPieChart(canvasId, question, responses) {
+        const ctx = document.getElementById(canvasId).getContext("2d");
+        new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: ["Yes", "No", "NC"],
+            datasets: [
+              {
+                label: question,
+                data: [responses.yes, responses.no, responses.NC],
+                backgroundColor: [
+                  "rgba(75, 192, 192, 0.7)",
+                  "rgba(255, 99, 132, 0.7)",
+                  "rgba(201, 203, 207, 0.7)",
+                ],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            title: {
+              display: true,
+              text: question + " Response Distribution",
+            },
+          },
+        });
+      }
+    </script>
+  </body>
+</html>
