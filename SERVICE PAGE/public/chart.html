@@ -3,82 +3,95 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Response Statistics</title>
+    <title>Survey Results</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-      .chart-container {
+      body {
+        font-family: Arial, sans-serif;
         display: flex;
-        justify-content: space-around;
-        margin-top: 20px;
-        height: 500px; /* Fixed height to prevent scrolling */
-        overflow-y: auto; /* Enable vertical scroll if needed */
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background: linear-gradient(to right, #6a11cb, #2575fc);
+        overflow: hidden;
       }
-      .chart-section {
+      .container {
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        max-width: 800px;
+        width: 100%;
         text-align: center;
       }
-      canvas {
-        max-width: 400px;
+      h1 {
+        font-size: 32px;
+        color: black;
         margin-bottom: 20px;
+      }
+      .total-submissions {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: black;
+      }
+      #chart-container {
+        position: relative;
+        height: 400px;
+        width: 100%;
       }
     </style>
   </head>
   <body>
-    <h2>Response Statistics</h2>
-    <div class="chart-container">
-      <div class="chart-section">
-        <canvas id="q1Chart" width="400" height="400"></canvas>
-        <h3>Q1</h3>
+    <div class="container">
+      <h1>Survey Results</h1>
+      <div class="total-submissions">
+        Total Submissions: <span id="total-submissions">0</span>
       </div>
-      <div class="chart-section">
-        <canvas id="q2Chart" width="400" height="400"></canvas>
-        <h3>Q2</h3>
-      </div>
-      <div class="chart-section">
-        <canvas id="q3Chart" width="400" height="400"></canvas>
-        <h3>Q3</h3>
+      <div id="chart-container">
+        <canvas id="survey-chart"></canvas>
       </div>
     </div>
-    <h3>Total Submissions: <span id="totalSubmissions"></span></h3>
-
     <script>
-      fetch("/responses")
+      fetch("/results")
         .then((response) => response.json())
         .then((data) => {
-          createPieChart("q1Chart", "Q1", data.q1);
-          createPieChart("q2Chart", "Q2", data.q2);
-          createPieChart("q3Chart", "Q3", data.q3);
-          document.getElementById("totalSubmissions").innerText =
+          document.getElementById("total-submissions").innerText =
             data.totalSubmissions;
-        });
 
-      function createPieChart(canvasId, question, responses) {
-        const ctx = document.getElementById(canvasId).getContext("2d");
-        new Chart(ctx, {
-          type: "pie",
-          data: {
-            labels: ["Yes", "No", "NC"],
-            datasets: [
-              {
-                label: question,
-                data: [responses.yes, responses.no, responses.NC],
-                backgroundColor: [
-                  "rgba(75, 192, 192, 0.7)",
-                  "rgba(255, 99, 132, 0.7)",
-                  "rgba(201, 203, 207, 0.7)",
-                ],
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            title: {
-              display: true,
-              text: question + " Response Distribution",
+          const ctx = document.getElementById("survey-chart").getContext("2d");
+          new Chart(ctx, {
+            type: "bar",
+            data: {
+              labels: ["Question 1", "Question 2", "Question 3"],
+              datasets: [
+                {
+                  label: "Yes",
+                  backgroundColor: "#4caf50",
+                  data: [data.q1.yes, data.q2.yes, data.q3.yes],
+                },
+                {
+                  label: "No",
+                  backgroundColor: "#f44336",
+                  data: [data.q1.no, data.q2.no, data.q3.no],
+                },
+                {
+                  label: "NC",
+                  backgroundColor: "#ffc107",
+                  data: [data.q1.NC, data.q2.NC, data.q3.NC],
+                },
+              ],
             },
-          },
+            options: {
+              responsive: true,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                },
+              },
+            },
+          });
         });
-      }
     </script>
   </body>
 </html>
