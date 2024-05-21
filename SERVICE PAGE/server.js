@@ -15,15 +15,21 @@ app.use(bodyParser.json());
 app.use(express.static("public"));
 
 app.post("/request", (req, res) => {
-  const response = JSON.parse(req.body.response);
+  const { name, response } = req.body;
+
+  // Ensure response is parsed correctly
+  const parsedResponse = JSON.parse(response);
 
   // Increment total submissions count
   responses.totalSubmissions++;
 
   // Aggregate responses
-  aggregateResponses(responses.q1, response.q1);
-  aggregateResponses(responses.q2, response.q2);
-  aggregateResponses(responses.q3, response.q3);
+  aggregateResponses(responses.q1, parsedResponse.q1);
+  aggregateResponses(responses.q2, parsedResponse.q2);
+  aggregateResponses(responses.q3, parsedResponse.q3);
+
+  // Log the survey name
+  console.log(`Survey from: ${name}`);
 
   // Send response with aggregated data
   res.json({
@@ -50,5 +56,5 @@ app.get("/results", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on port "enter IP ADDRESS" ${port}`);
+  console.log(`Server is running on port "IP ADDRESS" ${port}`);
 });
