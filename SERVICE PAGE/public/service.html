@@ -16,7 +16,6 @@
         background: linear-gradient(to right, #6a11cb, #2575fc);
         overflow: hidden;
       }
-
       .container {
         background-color: rgba(255, 255, 255, 0.9);
         padding: 30px;
@@ -26,29 +25,24 @@
         width: 100%;
         animation: fadeIn 1.5s ease-in-out;
       }
-
       h1 {
         font-size: 28px;
         margin-bottom: 20px;
         text-align: center;
         color: black;
       }
-
       .question {
         margin-bottom: 20px;
       }
-
       .question label {
         display: block;
         margin-bottom: 10px;
         font-size: 16px;
         color: #555;
       }
-
       .question input {
         margin-right: 10px;
       }
-
       .submit-btn {
         width: 100%;
         padding: 15px;
@@ -60,27 +54,22 @@
         cursor: pointer;
         transition: background-color 0.3s;
       }
-
       .submit-btn:hover {
         background-color: #45a049;
       }
-
       #thanks-message {
         display: none;
         text-align: center;
         animation: fadeIn 1.5s ease-in-out;
       }
-
       #thanks-message h2 {
         color: black;
       }
-
       @keyframes fadeIn {
         from {
           opacity: 0;
           transform: translateY(-20px);
         }
-
         to {
           opacity: 1;
           transform: translateY(0);
@@ -115,54 +104,54 @@
           <input type="radio" name="question3" value="yes" /> Yes
           <input type="radio" name="question3" value="no" /> No
         </div>
-        <button type="submit" class="submit-btn">Submit</button>
+        <button type="button" class="submit-btn" onclick="submitFeedback()">
+          Submit
+        </button>
       </form>
       <div id="thanks-message">
         <h2>Thanks for Submitting</h2>
       </div>
     </div>
+
     <script>
-      document
-        .getElementById("feedback-form")
-        .addEventListener("submit", async function (event) {
-          event.preventDefault();
-          var q1 = document.querySelector('input[name="question1"]:checked');
-          var q2 = document.querySelector('input[name="question2"]:checked');
-          var q3 = document.querySelector('input[name="question3"]:checked');
+      function submitFeedback() {
+        var q1 = document.querySelector('input[name="question1"]:checked');
+        var q2 = document.querySelector('input[name="question2"]:checked');
+        var q3 = document.querySelector('input[name="question3"]:checked');
 
-          // Check if at least one question is answered
-          if (!q1 && !q2 && !q3) {
-            alert("Please answer at least one question.");
-            return;
+        // Check if at least one question is answered
+        if (!q1 && !q2 && !q3) {
+          alert("Please answer at least one question.");
+          return;
+        }
+
+        var responseQ1 = q1 ? q1.value : "NC";
+        var responseQ2 = q2 ? q2.value : "NC";
+        var responseQ3 = q3 ? q3.value : "NC";
+
+        // Create JSON object
+        var arg = {
+          object: "survey",
+          crn: 99999999999,
+          response: JSON.stringify({
+            q1: responseQ1,
+            q2: responseQ2,
+            q3: responseQ3,
+          }),
+        };
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/request", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4) {
+            document.getElementById("feedback-form").style.display = "none";
+            document.getElementById("thanks-message").style.display = "block";
           }
-
-          var responseQ1 = q1 ? q1.value : "NC";
-          var responseQ2 = q2 ? q2.value : "NC";
-          var responseQ3 = q3 ? q3.value : "NC";
-
-          // Create JSON object
-          var data = {
-            action: "A",
-            responses: {
-              q1: responseQ1,
-              q2: responseQ2,
-              q3: responseQ3,
-            },
-          };
-          // Make AJAX call
-          var xhr = new XMLHttpRequest();
-          xhr.open("POST", "/submit", true);
-          xhr.setRequestHeader("Content-Type", "application/json");
-
-          xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-              // Display thank you message irrespective of the response
-              document.getElementById("feedback-form").style.display = "none";
-              document.getElementById("thanks-message").style.display = "block";
-            }
-          };
-          xhr.send(JSON.stringify(data));
-        });
+        };
+        xhr.send(JSON.stringify(arg));
+      }
     </script>
   </body>
 </html>
