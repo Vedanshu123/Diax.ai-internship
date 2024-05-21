@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const app = express();
 const port = 3000;
 
+// Initialize responses object to store survey responses
 let responses = {
   q1: { yes: 0, no: 0, NC: 0 },
   q2: { yes: 0, no: 0, NC: 0 },
@@ -13,21 +14,41 @@ let responses = {
 app.use(bodyParser.json());
 app.use(express.static("public"));
 
-app.post("/submit", (req, res) => {
-  const { q1, q2, q3 } = req.body.responses;
+app.post("/request", (req, res) => {
+  const response = JSON.parse(req.body.response);
 
-  responses.q1[q1]++;
-  responses.q2[q2]++;
-  responses.q3[q3]++;
+  // Increment total submissions count
   responses.totalSubmissions++;
 
-  res.sendStatus(200);
+  // Aggregate responses
+  aggregateResponses(responses.q1, response.q1);
+  aggregateResponses(responses.q2, response.q2);
+  aggregateResponses(responses.q3, response.q3);
+
+  // Send response with aggregated data
+  res.json({
+    success: true,
+    message: "Feedback submitted successfully",
+    totalSubmissions: responses.totalSubmissions,
+    aggregatedResponses: responses,
+  });
 });
 
-app.get("/responses", (req, res) => {
+// Function to aggregate responses
+function aggregateResponses(question, response) {
+  if (response === "yes") {
+    question.yes++;
+  } else if (response === "no") {
+    question.no++;
+  } else {
+    question.NC++;
+  }
+}
+
+app.get("/results", (req, res) => {
   res.json(responses);
 });
 
 app.listen(port, () => {
-  console.log(`Server running on "IP ADDRESS":${port}`);
+  console.log(`Server is running on port "enter IP ADDRESS" ${port}`);
 });
