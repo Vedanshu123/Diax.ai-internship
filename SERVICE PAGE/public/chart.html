@@ -68,26 +68,10 @@
     </div>
 
     <script>
-      // AJAX call to fetch survey results
       async function fetchResults() {
-        // Create JSON object for the request
-        var arg = {
-          object: "survey",
-          action: "R",
-          name: "DPS-Trichy",
-          crn: 99999999999,
-        };
-
-        const response = await fetch("/request", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ response: JSON.stringify(arg) }),
-        });
-
+        const response = await fetch("/results");
         const data = await response.json();
-        return data.aggregatedResponses;
+        return data;
       }
 
       function createPieChart(ctx, title, labels, values) {
@@ -98,17 +82,7 @@
             datasets: [
               {
                 data: values,
-                backgroundColor: [
-                  "#4caf50",
-                  "#f44336",
-                  "#ffeb3b", // Colors for Q1
-                  "#81c784",
-                  "#e57373",
-                  "#fff176", // Colors for Q2
-                  "#aed581",
-                  "#ef5350",
-                  "#fff59d", // Colors for Q3
-                ],
+                backgroundColor: ["#4caf50", "#f44336", "#ffeb3b"],
               },
             ],
           },
