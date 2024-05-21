@@ -5,93 +5,151 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Survey Results</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <style>
       body {
         font-family: Arial, sans-serif;
+        background: linear-gradient(to right, #6a11cb, #2575fc);
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
         margin: 0;
-        background: linear-gradient(to right, #6a11cb, #2575fc);
-        overflow: hidden;
+        padding: 20px;
       }
       .container {
         background-color: rgba(255, 255, 255, 0.9);
         padding: 30px;
         border-radius: 12px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        max-width: 800px;
+        max-width: 900px;
         width: 100%;
-        text-align: center;
+        overflow-y: auto;
+        max-height: 90vh;
       }
       h1 {
-        font-size: 32px;
+        text-align: center;
         color: black;
-        margin-bottom: 20px;
+      }
+      .chart-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+      }
+      .chart-box {
+        width: 45%;
+        margin: 20px 0;
       }
       .total-submissions {
         font-size: 24px;
+        text-align: center;
         margin-bottom: 20px;
-        color: black;
-      }
-      #chart-container {
-        position: relative;
-        height: 400px;
-        width: 100%;
       }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>Survey Results</h1>
-      <div class="total-submissions">
-        Total Submissions: <span id="total-submissions">0</span>
-      </div>
-      <div id="chart-container">
-        <canvas id="survey-chart"></canvas>
+      <div class="total-submissions" id="total-submissions"></div>
+      <div class="chart-container">
+        <div class="chart-box">
+          <canvas id="q1Chart"></canvas>
+        </div>
+        <div class="chart-box">
+          <canvas id="q2Chart"></canvas>
+        </div>
+        <div class="chart-box">
+          <canvas id="q3Chart"></canvas>
+        </div>
+        <div class="chart-box">
+          <canvas id="totalChart"></canvas>
+        </div>
       </div>
     </div>
-    <script>
-      fetch("/results")
-        .then((response) => response.json())
-        .then((data) => {
-          document.getElementById("total-submissions").innerText =
-            data.totalSubmissions;
 
-          const ctx = document.getElementById("survey-chart").getContext("2d");
-          new Chart(ctx, {
-            type: "bar",
-            data: {
-              labels: ["Question 1", "Question 2", "Question 3"],
-              datasets: [
-                {
-                  label: "Yes",
-                  backgroundColor: "#4caf50",
-                  data: [data.q1.yes, data.q2.yes, data.q3.yes],
+    <script>
+      async function fetchResults() {
+        const response = await fetch("/results");
+        const data = await response.json();
+        return data;
+      }
+
+      function createPieChart(ctx, title, labels, values) {
+        new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                data: values,
+                backgroundColor: ["#4caf50", "#f44336", "#ffeb3b"],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+              title: {
+                display: true,
+                text: title,
+              },
+              datalabels: {
+                formatter: (value, context) => {
+                  const total = context.chart._metasets[0].total;
+                  const percentage = ((value / total) * 100).toFixed(1) + "%";
+                  return `${value} (${percentage})`;
                 },
-                {
-                  label: "No",
-                  backgroundColor: "#f44336",
-                  data: [data.q1.no, data.q2.no, data.q3.no],
-                },
-                {
-                  label: "NC",
-                  backgroundColor: "#ffc107",
-                  data: [data.q1.NC, data.q2.NC, data.q3.NC],
-                },
-              ],
-            },
-            options: {
-              responsive: true,
-              scales: {
-                y: {
-                  beginAtZero: true,
+                color: "black",
+                font: {
+                  weight: "bold",
                 },
               },
             },
-          });
+          },
+          plugins: [ChartDataLabels],
         });
+      }
+
+      function renderCharts(data) {
+        const totalSubmissions = data.totalSubmissions;
+        document.getElementById(
+          "total-submissions"
+        ).innerText = `Total Submissions: ${totalSubmissions}`;
+
+        const q1Labels = ["Yes", "No", "NC"];
+        const q1Values = [data.q1.yes, data.q1.no, data.q1.NC];
+        const q1Ctx = document.getElementById("q1Chart").getContext("2d");
+        createPieChart(q1Ctx, "Question 1", q1Labels, q1Values);
+
+        const q2Labels = ["Yes", "No", "NC"];
+        const q2Values = [data.q2.yes, data.q2.no, data.q2.NC];
+        const q2Ctx = document.getElementById("q2Chart").getContext("2d");
+        createPieChart(q2Ctx, "Question 2", q2Labels, q2Values);
+
+        const q3Labels = ["Yes", "No", "NC"];
+        const q3Values = [data.q3.yes, data.q3.no, data.q3.NC];
+        const q3Ctx = document.getElementById("q3Chart").getContext("2d");
+        createPieChart(q3Ctx, "Question 3", q3Labels, q3Values);
+
+        const totalLabels = ["Yes", "No", "NC"];
+        const totalValues = [
+          data.q1.yes + data.q2.yes + data.q3.yes,
+          data.q1.no + data.q2.no + data.q3.no,
+          data.q1.NC + data.q2.NC + data.q3.NC,
+        ];
+        const totalCtx = document.getElementById("totalChart").getContext("2d");
+        createPieChart(totalCtx, "Overall", totalLabels, totalValues);
+      }
+
+      async function initialize() {
+        const data = await fetchResults();
+        renderCharts(data);
+      }
+
+      window.onload = initialize;
     </script>
   </body>
 </html>
