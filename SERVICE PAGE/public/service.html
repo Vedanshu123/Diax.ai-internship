@@ -16,6 +16,7 @@
         background: linear-gradient(to right, #6a11cb, #2575fc);
         overflow: hidden;
       }
+
       .container {
         background-color: rgba(255, 255, 255, 0.9);
         padding: 30px;
@@ -25,24 +26,29 @@
         width: 100%;
         animation: fadeIn 1.5s ease-in-out;
       }
+
       h1 {
         font-size: 28px;
         margin-bottom: 20px;
         text-align: center;
         color: black;
       }
+
       .question {
         margin-bottom: 20px;
       }
+
       .question label {
         display: block;
         margin-bottom: 10px;
         font-size: 16px;
         color: #555;
       }
+
       .question input {
         margin-right: 10px;
       }
+
       .submit-btn {
         width: 100%;
         padding: 15px;
@@ -54,22 +60,27 @@
         cursor: pointer;
         transition: background-color 0.3s;
       }
+
       .submit-btn:hover {
         background-color: #45a049;
       }
+
       #thanks-message {
         display: none;
         text-align: center;
         animation: fadeIn 1.5s ease-in-out;
       }
+
       #thanks-message h2 {
         color: black;
       }
+
       @keyframes fadeIn {
         from {
           opacity: 0;
           transform: translateY(-20px);
         }
+
         to {
           opacity: 1;
           transform: translateY(0);
@@ -85,24 +96,24 @@
           <label for="question1"
             >1. Are you issuing digital prescriptions?</label
           >
-          <input type="radio" name="question1" value="yes" required /> Yes
-          <input type="radio" name="question1" value="no" required /> No
+          <input type="radio" name="question1" value="yes" /> Yes
+          <input type="radio" name="question1" value="no" /> No
         </div>
         <div class="question">
           <label for="question2"
             >2. Will you be interested in paid software that suggests drugs for
             patients?</label
           >
-          <input type="radio" name="question2" value="yes" required /> Yes
-          <input type="radio" name="question2" value="no" required /> No
+          <input type="radio" name="question2" value="yes" /> Yes
+          <input type="radio" name="question2" value="no" /> No
         </div>
         <div class="question">
           <label for="question3"
             >3. Will you be interested in paid software with well-defined
             process to treat diabetic foot effectively?</label
           >
-          <input type="radio" name="question3" value="yes" required /> Yes
-          <input type="radio" name="question3" value="no" required /> No
+          <input type="radio" name="question3" value="yes" /> Yes
+          <input type="radio" name="question3" value="no" /> No
         </div>
         <button type="submit" class="submit-btn">Submit</button>
       </form>
@@ -115,17 +126,42 @@
         .getElementById("feedback-form")
         .addEventListener("submit", async function (event) {
           event.preventDefault();
-          const formData = new FormData(event.target);
-          const data = Object.fromEntries(formData.entries());
-          const response = await fetch("/submit-feedback", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-          });
-          if (response.ok) {
-            document.getElementById("feedback-form").style.display = "none";
-            document.getElementById("thanks-message").style.display = "block";
+          var q1 = document.querySelector('input[name="question1"]:checked');
+          var q2 = document.querySelector('input[name="question2"]:checked');
+          var q3 = document.querySelector('input[name="question3"]:checked');
+
+          // Check if at least one question is answered
+          if (!q1 && !q2 && !q3) {
+            alert("Please answer at least one question.");
+            return;
           }
+
+          var responseQ1 = q1 ? q1.value : "NC";
+          var responseQ2 = q2 ? q2.value : "NC";
+          var responseQ3 = q3 ? q3.value : "NC";
+
+          // Create JSON object
+          var data = {
+            action: "A",
+            responses: {
+              q1: responseQ1,
+              q2: responseQ2,
+              q3: responseQ3,
+            },
+          };
+          // Make AJAX call
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", "/submit", true);
+          xhr.setRequestHeader("Content-Type", "application/json");
+
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+              // Display thank you message irrespective of the response
+              document.getElementById("feedback-form").style.display = "none";
+              document.getElementById("thanks-message").style.display = "block";
+            }
+          };
+          xhr.send(JSON.stringify(data));
         });
     </script>
   </body>
