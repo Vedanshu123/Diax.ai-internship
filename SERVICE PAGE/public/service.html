@@ -132,7 +132,9 @@
         // Create JSON object
         var arg = {
           object: "survey",
+          action: "A",
           crn: 99999999999,
+          name: "DPS-Trichy",
           response: JSON.stringify({
             q1: responseQ1,
             q2: responseQ2,
@@ -140,6 +142,9 @@
           }),
         };
 
+        var jsonString = JSON.stringify(arg);
+
+        //Make AJAX Call
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "/request", true);
         xhr.setRequestHeader("Content-Type", "application/json");
@@ -150,7 +155,7 @@
             document.getElementById("thanks-message").style.display = "block";
           }
         };
-        xhr.send(JSON.stringify(arg));
+        xhr.send(jsonString);
       }
     </script>
   </body>
