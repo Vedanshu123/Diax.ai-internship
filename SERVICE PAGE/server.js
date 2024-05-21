@@ -1,51 +1,33 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const cors = require("cors");
-const fs = require("fs");
-const path = require("path");
-
 const app = express();
-const PORT = 3000;
+const port = 3000;
 
-app.use(cors());
+let responses = {
+  q1: { yes: 0, no: 0, NC: 0 },
+  q2: { yes: 0, no: 0, NC: 0 },
+  q3: { yes: 0, no: 0, NC: 0 },
+  totalSubmissions: 0,
+};
+
 app.use(bodyParser.json());
+app.use(express.static("public"));
 
-// Serve static files from the 'public' folder
-app.use(express.static(path.join(__dirname, "public")));
+app.post("/submit", (req, res) => {
+  const { q1, q2, q3 } = req.body.responses;
 
-// Helper function to update statistics
-function updateStatistics(feedback) {
-  const statsPath = path.join(__dirname, "statistics.json");
-  const stats = JSON.parse(fs.readFileSync(statsPath, "utf-8"));
+  responses.q1[q1]++;
+  responses.q2[q2]++;
+  responses.q3[q3]++;
+  responses.totalSubmissions++;
 
-  stats.question1[feedback.question1]++;
-  stats.question2[feedback.question2]++;
-  stats.question3[feedback.question3]++;
-
-  fs.writeFileSync(statsPath, JSON.stringify(stats, null, 2), "utf-8");
-}
-
-// Endpoint to handle form submission
-app.post("/submit-feedback", (req, res) => {
-  const feedback = req.body;
-
-  // Append feedback to feedback.json
-  fs.appendFile("feedback.json", JSON.stringify(feedback) + "\n", (err) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send("Internal Server Error");
-    } else {
-      // Update statistics.json
-      updateStatistics(feedback);
-      res.status(200).send("Feedback received");
-    }
-  });
+  res.sendStatus(200);
 });
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+app.get("/responses", (req, res) => {
+  res.json(responses);
 });
 
-app.listen(PORT, "enter ip address", () => {
-  console.log(`Server is running on http://"ip address":${PORT}`);
+app.listen(port, () => {
+  console.log(`Server running on "IP ADDRESS":${port}`);
 });
