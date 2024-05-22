@@ -68,10 +68,28 @@
     </div>
 
     <script>
-      async function fetchResults() {
-        const response = await fetch("/results");
-        const data = await response.json();
-        return data;
+      var data = "";
+      function fetchResults() {
+        var arg = {
+          object: "survey",
+          action: "R",
+          crn: 99999999999,
+          name: "DPS-Trichy",
+        };
+
+        var jsonString = JSON.stringify(arg);
+
+        // Make AJAX Call
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/request", false);
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4) {
+            data = xhr.responseText;
+          }
+        };
+        xhr.send(jsonString);
       }
 
       function createPieChart(ctx, title, labels, values) {
@@ -113,43 +131,46 @@
         });
       }
 
-      function renderCharts(data) {
-        const totalSubmissions = data.totalSubmissions;
-        document.getElementById(
-          "total-submissions"
-        ).innerText = `Total Submissions: ${totalSubmissions}`;
+      function initialize() {
+        fetchResults();
+        const nd = JSON.parse(data);
+        const resp = nd.response[0].response;
 
-        const q1Labels = ["Yes", "No", "NC"];
-        const q1Values = [data.q1.yes, data.q1.no, data.q1.NC];
-        const q1Ctx = document.getElementById("q1Chart").getContext("2d");
-        createPieChart(q1Ctx, "Question 1", q1Labels, q1Values);
+        document.getElementById("total-submissions").innerText =
+          "Total Submissions: " + resp.totalSubmissions;
 
-        const q2Labels = ["Yes", "No", "NC"];
-        const q2Values = [data.q2.yes, data.q2.no, data.q2.NC];
-        const q2Ctx = document.getElementById("q2Chart").getContext("2d");
-        createPieChart(q2Ctx, "Question 2", q2Labels, q2Values);
+        createPieChart(
+          document.getElementById("q1Chart").getContext("2d"),
+          "Question 1",
+          ["Yes", "No", "No Comment"],
+          [resp.q1.yes, resp.q1.no, resp.q1.NC]
+        );
+        createPieChart(
+          document.getElementById("q2Chart").getContext("2d"),
+          "Question 2",
+          ["Yes", "No", "No Comment"],
+          [resp.q2.yes, resp.q2.no, resp.q2.NC]
+        );
+        createPieChart(
+          document.getElementById("q3Chart").getContext("2d"),
+          "Question 3",
+          ["Yes", "No", "No Comment"],
+          [resp.q3.yes, resp.q3.no, resp.q3.NC]
+        );
 
-        const q3Labels = ["Yes", "No", "NC"];
-        const q3Values = [data.q3.yes, data.q3.no, data.q3.NC];
-        const q3Ctx = document.getElementById("q3Chart").getContext("2d");
-        createPieChart(q3Ctx, "Question 3", q3Labels, q3Values);
-
-        const totalLabels = ["Yes", "No", "NC"];
-        const totalValues = [
-          data.q1.yes + data.q2.yes + data.q3.yes,
-          data.q1.no + data.q2.no + data.q3.no,
-          data.q1.NC + data.q2.NC + data.q3.NC,
-        ];
-        const totalCtx = document.getElementById("totalChart").getContext("2d");
-        createPieChart(totalCtx, "Overall", totalLabels, totalValues);
+        createPieChart(
+          document.getElementById("totalChart").getContext("2d"),
+          "Total Responses",
+          ["Yes", "No", "No Comment"],
+          [
+            resp.q1.yes + resp.q2.yes + resp.q3.yes,
+            resp.q1.no + resp.q2.no + resp.q3.no,
+            resp.q1.NC + resp.q2.NC + resp.q3.NC,
+          ]
+        );
       }
 
-      async function initialize() {
-        const data = await fetchResults();
-        renderCharts(data);
-      }
-
-      window.onload = initialize;
+      document.addEventListener("DOMContentLoaded", initialize);
     </script>
   </body>
 </html>
